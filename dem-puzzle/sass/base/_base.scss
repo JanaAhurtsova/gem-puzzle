@@ -1,0 +1,10 @@
+html {
+    font-size: 10px;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Roboto', Verdana, sans-serif;
+    @include font($size: 1.9rem, $height: 140%);
+}

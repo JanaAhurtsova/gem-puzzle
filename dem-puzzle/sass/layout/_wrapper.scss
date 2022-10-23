@@ -1,0 +1,53 @@
+.wrapper,
+.header__wrapper {
+    max-width: $content-width;
+    margin: auto;
+    @include flex();
+    flex-direction: column;
+}
+
+.header__wrapper {
+    z-index: 10;
+    width: 100%;
+    @include media-tablet {
+        position: fixed;
+        align-items: flex-end;
+    }
+}
+
+.buttons__container {
+    @include flex($justify: space-around);
+    gap: 15px;
+    margin-bottom: 30px;
+    width: 100%;
+    @include media-tablet {
+        position: fixed;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-direction: column;
+        padding: 50px 0 0 25px;
+        width: 100%;
+        height: 200px;
+        top: 0;
+        background-color: rgb(255, 255, 255);
+        border: none;
+        left: 100%;
+        visibility: hidden;
+        opacity: 0;
+        transition: all .5s linear;
+        z-index: 10;
+    }
+    &.active {
+        @include media-tablet {
+            left: 0;
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}
+
+.game__process {
+    @include flex($justify: space-between);
+    margin-bottom: 30px;
+    width: 100%;
+}

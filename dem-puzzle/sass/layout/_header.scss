@@ -1,0 +1,10 @@
+.header {
+    @include flex($justify: space-around);
+    max-width: 500px;
+    height: 100px;
+    margin: auto;
+    @include media-tablet {
+        height: 60px;
+    }
+}
+
