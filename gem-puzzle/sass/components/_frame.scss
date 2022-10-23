@@ -26,6 +26,10 @@
     transition: transform .3s cubic-bezier(0.165, 0.84, 0.44, 1.2);
     &:active {
         filter: drop-shadow(0 0 20px rgb(108, 131, 150));
+        transform: scale(1.5);
+    }
+    @include media-tablet {
+        font-size: 2rem;
     }
 }
 

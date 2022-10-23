@@ -137,14 +137,18 @@ hamburger.addEventListener('click', () => {
     hamburgerLine.classList.toggle('active');
     buttonsContainer.classList.toggle('active');
     overlay.classList.toggle('active');
+    body.classList.add('lock');
 })
 
-overlay.addEventListener('click', () => {
+overlay.addEventListener('click', closeBurger);
+
+function closeBurger() {
     hamburger.classList.remove('active');
     hamburgerLine.classList.remove('active');
     buttonsContainer.classList.remove('active');
     overlay.classList.remove('active');
-})
+    body.classList.remove('lock');
+}
 
 //sound of game
 volume.addEventListener('click', () => {
@@ -224,7 +228,10 @@ const maxShuffle = 70;
 let duration;
 let shuffled = false;
 
-shuffleBtn.addEventListener('click', shuffledField);
+shuffleBtn.addEventListener('click', () => {
+    shuffledField();
+    closeBurger();
+});
 
 //shuffle tiles
 function shuffledField() {
@@ -428,6 +435,7 @@ pauseBtn.addEventListener('click', () => {
         pauseBtn.textContent = 'Pause';
         startTimer();
     }
+    closeBurger()
 })
 
 //won 

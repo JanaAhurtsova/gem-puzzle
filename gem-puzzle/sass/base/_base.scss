@@ -7,4 +7,9 @@ html {
 body {
     font-family: 'Roboto', Verdana, sans-serif;
     @include font($size: 1.9rem, $height: 140%);
+    margin-top: 0;
+}
+
+.lock {
+    overflow-y: hidden;
 }

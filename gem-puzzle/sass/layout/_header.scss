@@ -1,8 +1,8 @@
 .header {
     @include flex($justify: space-around);
-    max-width: 500px;
     height: 100px;
     margin: auto;
+    background-color: $color-text;
     @include media-tablet {
         height: 60px;
     }
