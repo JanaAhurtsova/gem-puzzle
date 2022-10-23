@@ -4,7 +4,7 @@
   "description": "",
   "main": ".index.js",
   "scripts": {
-    "style": "sass --watch dem-puzzle/sass/style.scss dem-puzzle/sass/style.css"
+    "style": "sass --watch gem-puzzle/sass/style.scss gem-puzzle/sass/style.css"
   },
   "author": "",
   "license": "ISC"

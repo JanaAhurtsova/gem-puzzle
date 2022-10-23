@@ -1,3 +1,4 @@
+//create layout
 const body = document.querySelector('body')
 
 const overlay = document.createElement('div');
@@ -47,15 +48,25 @@ gameProcess.classList.add('game__process');
 
 const move = document.createElement('span');
 move.classList.add('text');
-move.textContent = 'Move: 0';
+move.textContent = 'Move: ';
+
+const moveNum = document.createElement('span');
+moveNum.classList.add('text');
+moveNum.textContent = '0';
+move.append(moveNum);
 
 const volume = document.createElement('div');
 volume.classList.add('volume');
 
 const time = document.createElement('span');
 time.classList.add('text');
-time.textContent = 'Time: 00:00';
+time.textContent = 'Time: ';
 gameProcess.append(move, volume, time);
+
+const timeNum = document.createElement('span');
+timeNum.classList.add('text');
+timeNum.textContent = '00:00';
+time.append(timeNum);
 
 const audio = document.createElement('audio');
 audio.setAttribute('src', 'assets/drop_sound.mp3')
@@ -75,7 +86,10 @@ sizeBlock.classList.add('choose__size');
 const otherSizes = document.createElement('span');
 otherSizes.classList.add('sizes');
 otherSizes.textContent = 'Other sizes:';
-wrapper.append(gameProcess, audio, frame, frameSize, otherSizes, sizeBlock);
+
+const audioWin = document.createElement('audio');
+audioWin.setAttribute('src', 'assets/win.mp3')
+wrapper.append(gameProcess, frame, frameSize, otherSizes, sizeBlock);
 
 const size3 = document.createElement('span');
 const size4 = document.createElement('span');
@@ -84,6 +98,9 @@ const size6 = document.createElement('span');
 const size7 = document.createElement('span');
 const size8 = document.createElement('span');
 sizeBlock.append(size3, size4, size5, size6, size7, size8);
+
+const wonCard = document.createElement('div')
+wonCard.className = 'won';
 
 const sizes = [size3, size4, size5, size6, size7, size8];
 
@@ -114,6 +131,7 @@ let interval = null;
 const emptyNumber = 0;
 let blockedCoords = null;
 
+//burger menu
 hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('active');
     hamburgerLine.classList.toggle('active');
@@ -128,6 +146,7 @@ overlay.addEventListener('click', () => {
     overlay.classList.remove('active');
 })
 
+//sound of game
 volume.addEventListener('click', () => {
     audio.muted = !audio.muted;
     audioShuffle.muted = !audioShuffle.muted
@@ -138,6 +157,7 @@ volume.addEventListener('click', () => {
     }
 })
 
+//create tiles
 let cells = [];
 
 function createTiles() {
@@ -163,13 +183,10 @@ function createTiles() {
 
 createTiles()
 
-const countTile = selectedSize * selectedSize;
+
+let countTile = selectedSize * selectedSize;
 let cellsArr = cells.map(cell => Number(cell.dataset.id));
 let matrix = getMatrix(cellsArr);
-let cellsMatrix = []
-for(let i = 0; i < cells.length; i++) {
-    cellsMatrix = matrix.map(el => el.map(item => cells[i]));
-}
 setPositionCells(matrix);
 
 if(cells.length != countTile) {
@@ -209,6 +226,7 @@ let shuffled = false;
 
 shuffleBtn.addEventListener('click', shuffledField);
 
+//shuffle tiles
 function shuffledField() {
     resetTimer();
 
@@ -216,7 +234,7 @@ function shuffledField() {
         return
     }
 
-    move.textContent = 'Move: 0';
+    moveNum.textContent = '0';
 
     audioShuffle.play();
     shuffled = true;
@@ -262,21 +280,6 @@ function randomSwap(matrix) {
     swap(blankCoords, swapCoords, matrix)
 }
 
-function findValidCoordinates({ blankCoords, matrix, blockedCoords }) {
-    let validCoords = [];
-
-    for(let y = 0; y < matrix.length; y++) {
-        for(let x = 0; x < matrix[y].length; x++) {
-            if(isValidForSwap({x, y}, blankCoords)) {
-                if(!blockedCoords || !(blockedCoords.x === x && blockedCoords.y === y)) {
-                    validCoords.push({x, y})
-                }
-            } 
-        }
-    }
-    return validCoords
-}
-
 frame.addEventListener('click', game)
 
 function game(event) {
@@ -295,14 +298,30 @@ function game(event) {
     const cellCoords = findCoordinatesByNum(cellNum, matrix);
     const blankCoords = findCoordinatesByNum(emptyNumber, matrix);
     const isValid = isValidForSwap(cellCoords, blankCoords);
-    console.log(isValid)
+    console.log(cellCoords, blankCoords)
 
     if(isValid) {
         swap(cellCoords, blankCoords, matrix);
         setPositionCells(matrix)
         count++
-        move.textContent = `Move: ${count}`;
+        moveNum.textContent = `${count}`;
     }
+}
+
+//solvability check
+function findValidCoordinates({ blankCoords, matrix, blockedCoords }) {
+    let validCoords = [];
+    let i = 0;
+    for(let y = 0; y < matrix.length; y++) {
+        for(let x = 0; x < matrix[y].length; x++) {
+            if(isValidForSwap({x, y}, blankCoords)) {
+                if(!blockedCoords || !(blockedCoords.x === x && blockedCoords.y === y)) {
+                    validCoords.push({x, y})
+                }
+            }
+        }
+    }
+    return validCoords
 }
 
 function findCoordinatesByNum(num, matrix) {
@@ -326,8 +345,73 @@ function swap(coords1, coords2, matrix) {
     const coords1Num = matrix[coords1.y][coords1.x];
     matrix[coords1.y][coords1.x] = matrix[coords2.y][coords2.x];
     matrix[coords2.y][coords2.x] = coords1Num;
+
+    if(isWon(matrix)) {
+        stopTimer();
+        setTimeout(() => {
+          generateWonCard();
+        }, 500);
+    }
 }
 
+//create timer
+function timer() {
+    seconds++;
+
+    let secs = seconds % 60;
+    let mins = Math.floor(seconds / 60);
+    if(secs < 10) secs = '0' + secs;
+    if(mins < 10) mins = '0' + mins;
+    
+    timeNum.innerText = `${mins}:${secs}`;
+}
+
+function startTimer() {
+    if(interval) {
+        return;
+    }
+    interval = setInterval(timer, 1000)
+}
+
+function stopTimer() {
+    clearInterval(interval);
+    interval = null;
+}
+
+function resetTimer() {
+    stopTimer();
+    seconds = 0;
+    timeNum.textContent = '00:00'
+}
+
+//change size
+
+sizeBlock.addEventListener('click', (event) => {
+    sizes.forEach(size => size.classList.remove('active'));
+    let size = event.target.closest('span');
+    if (!size) return;
+    activeSize(size);
+    frame.innerHTML = '';
+    cells = [];
+    changeSize();
+    createTiles();
+    cellsArr = cells.map(cell => Number(cell.dataset.id));
+    matrix = getMatrix(cellsArr);
+    countTile = selectedSize * selectedSize;
+    setPositionCells(matrix);
+    shuffledField();
+    frameSize.textContent = `Frame size: ${selectedSize}x${selectedSize}`;
+})
+
+function activeSize(size) {
+    if(selected) {
+        selected.classList.remove('active');
+    }
+    selected = size;
+    selected.classList.add('active');
+}
+
+//buttons
 let isGame = false;
 
 pauseBtn.addEventListener('click', () => {
@@ -346,55 +430,41 @@ pauseBtn.addEventListener('click', () => {
     }
 })
 
-function timer() {
-    seconds++;
+//won 
 
-    let secs = seconds % 60;
-    let mins = Math.floor(seconds / 60);
-    if(secs < 10) secs = '0' + secs;
-    if(mins < 10) mins = '0' + mins;
-    
-    time.innerText = `Time: ${mins}:${secs}`;
-}
-
-function startTimer() {
-    if(interval) {
-        return;
+function isWon(matrix) {
+    let winArr = new Array(countTile).fill(0).map((item, i) => i + 1);
+    winArr[winArr.length - 1] = 0;  
+    let matrixArr = matrix.flat();
+    for(let i = 0; i < winArr.length; i++) {
+       if (matrixArr[i] !== winArr[i]) {
+        return false;
+       }
     }
-    interval = setInterval(timer, 1000)
+    return true;
 }
 
-function stopTimer() {
-    clearInterval(interval);
-    interval = null;
+function generateWonCard() {
+    let template = '';
+    const overlayWon = document.createElement('div')
+    overlayWon.className = 'overlay__won';
+
+    template += `<div class='won'>`
+    template += `<span class='won__text'>Hooray! You solved the puzzle in ${timeNum.textContent} and ${moveNum.textContent} moves!</span>`
+    template += `</div>`
+
+    body.append(overlayWon);
+    overlayWon.innerHTML = template;
+    overlayWon.addEventListener('click', closeWonMessage);
+    audioWin.play();
+    return overlayWon;
 }
 
-function resetTimer() {
-    stopTimer();
-    seconds = 0;
-    time.textContent = 'Time: 00:00'
-}
-
-sizeBlock.addEventListener('click', (event) => {
-    sizes.forEach(size => size.classList.remove('active'));
-    let size = event.target.closest('span');
-    if (!size) return;
-    activeSize(size);
-    frame.innerHTML = '';
-    cells = [];
-    changeSize();
-    createTiles();
-    cellsArr = cells.map(cell => Number(cell.dataset.id));
-    matrix = getMatrix(cellsArr);
-    setPositionCells(matrix);
-    shuffledField();
-    frameSize.textContent = `Frame size: ${selectedSize}x${selectedSize}`;
-})
-
-function activeSize(size) {
-    if(selected) {
-        selected.classList.remove('active');
+function closeWonMessage(e) {
+    let classes = e.target.classList;
+    if(classes.contains('overlay__won')) {
+        document.querySelector('.overlay__won').remove();
+        audioWin.pause();
     }
-    selected = size;
-    selected.classList.add('active');
 }
+
