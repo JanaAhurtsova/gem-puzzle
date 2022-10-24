@@ -80,8 +80,8 @@ audioShuffle.setAttribute('src', 'assets/waterfall.mp3')
 const frameSize = document.createElement('span');
 frameSize.classList.add('frame__size');
 
-const sizeBlock = document.createElement('div');
-sizeBlock.classList.add('choose__size');
+const sizeContainer = document.createElement('div');
+sizeContainer.classList.add('choose__size');
 
 const otherSizes = document.createElement('span');
 otherSizes.classList.add('sizes');
@@ -89,7 +89,7 @@ otherSizes.textContent = 'Other sizes:';
 
 const audioWin = document.createElement('audio');
 audioWin.setAttribute('src', 'assets/win.mp3')
-wrapper.append(gameProcess, frame, frameSize, otherSizes, sizeBlock);
+wrapper.append(gameProcess, frame, frameSize, otherSizes, sizeContainer);
 
 const size3 = document.createElement('span');
 const size4 = document.createElement('span');
@@ -97,7 +97,7 @@ const size5 = document.createElement('span');
 const size6 = document.createElement('span');
 const size7 = document.createElement('span');
 const size8 = document.createElement('span');
-sizeBlock.append(size3, size4, size5, size6, size7, size8);
+sizeContainer.append(size3, size4, size5, size6, size7, size8);
 
 const wonCard = document.createElement('div')
 wonCard.className = 'won';
@@ -181,12 +181,13 @@ function createTiles() {
         cell.style.width = `${frame.offsetWidth * 100 / frame.offsetWidth / selectedSize}%`;
         cell.style.height = `${frame.offsetWidth * 100 / frame.offsetWidth / selectedSize - 0.2}% `;
 
+        cell.setAttribute('draggable', true)
+
         cells.push(cell)
     }
 }
 
 createTiles()
-
 
 let countTile = selectedSize * selectedSize;
 let cellsArr = cells.map(cell => Number(cell.dataset.id));
@@ -246,7 +247,8 @@ function shuffledField() {
     audioShuffle.play();
     shuffled = true;
     
-    randomSwap(matrix);
+    const shuffleArr = randomShuffle(matrix.flat());
+    matrix = getMatrix(shuffleArr)
     setPositionCells(matrix);
 
     clearInterval(duration);
@@ -254,7 +256,7 @@ function shuffledField() {
 
     if(shuffleCount === 0) {
         duration = setInterval(() => {
-            randomSwap(matrix);
+            randomShuffle(matrix.flat());
             setPositionCells(matrix);
 
             shuffleCount += 1;
@@ -264,27 +266,21 @@ function shuffledField() {
                 shuffled = false;
                 audioShuffle.pause();
                 startTimer();
+                if(!isSolvable(matrix)) {
+                    shuffledField();
+                }
             }
         }, 25)
     }
 }
+
 shuffledField();
 
-function randomSwap(matrix) {
-    const blankCoords = findCoordinatesByNum(emptyNumber, matrix);
-    const validCoords = findValidCoordinates({
-        blankCoords,
-        matrix,
-        blockedCoords
-    })
-
-    blockedCoords = blankCoords;
-
-    const swapCoords = validCoords[
-        Math.floor(Math.random() * validCoords.length)
-    ];
-
-    swap(blankCoords, swapCoords, matrix)
+function randomShuffle(arr) {
+    return arr
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
 }
 
 frame.addEventListener('click', game)
@@ -304,14 +300,19 @@ function game(event) {
     const cellNum = Number(cell.dataset.id);
     const cellCoords = findCoordinatesByNum(cellNum, matrix);
     const blankCoords = findCoordinatesByNum(emptyNumber, matrix);
-    const isValid = isValidForSwap(cellCoords, blankCoords);
-    console.log(cellCoords, blankCoords)
-
-    if(isValid) {
+    const isValidSwap = isValidForSwap(cellCoords, blankCoords);
+    
+    if(isValidSwap) {
         swap(cellCoords, blankCoords, matrix);
         setPositionCells(matrix)
         count++
         moveNum.textContent = `${count}`;
+        if(isWon(matrix)) {
+            stopTimer();
+            setTimeout(() => {
+            generateWonCard();
+            }, 500);
+        }
     }
 }
 
@@ -352,12 +353,41 @@ function swap(coords1, coords2, matrix) {
     const coords1Num = matrix[coords1.y][coords1.x];
     matrix[coords1.y][coords1.x] = matrix[coords2.y][coords2.x];
     matrix[coords2.y][coords2.x] = coords1Num;
+}
 
-    if(isWon(matrix)) {
-        stopTimer();
-        setTimeout(() => {
-          generateWonCard();
-        }, 500);
+function getInversion(arr) {
+    let inversion = 0;
+    for (let i = 0; i < countTile - 1; i++) {
+        for (let j = i + 1; j < countTile; j++) {
+            if (arr[j] && arr[i] && arr[i] > arr[j]) {
+                inversion++;
+            }
+        }
+    }
+    return inversion;
+}
+
+function findEmptyPos(matrix) {
+    for (let i = selectedSize - 1; i >= 0; i--) {
+        for (let j = selectedSize - 1; j >= 0; j--) {
+            if (matrix[i][j] == 0) {
+                return selectedSize - i;
+            }
+        }
+    }
+}
+function isSolvable(matrix) {
+    let matrixArr = matrix.flat();
+    let pos = findEmptyPos(matrix);
+    let inversions = getInversion(matrixArr);
+    if(selectedSize % 2 !== 0) {
+        return inversions % 2 === 0;
+    } else {
+        if(pos % 2 === 0) {
+            return inversions % 2 !== 0;
+        } else {
+            return inversions % 2 === 0
+        }
     }
 }
 
@@ -393,7 +423,7 @@ function resetTimer() {
 
 //change size
 
-sizeBlock.addEventListener('click', (event) => {
+sizeContainer.addEventListener('click', (event) => {
     sizes.forEach(size => size.classList.remove('active'));
     let size = event.target.closest('span');
     if (!size) return;
@@ -475,4 +505,41 @@ function closeWonMessage(e) {
         audioWin.pause();
     }
 }
+
+frame.addEventListener('dragstart', dragStart);
+frame.addEventListener('dragend', dragEnd);
+
+function dragStart(event) {
+    const cell = event.target.closest('button');
+    if(!cell) {
+        return;
+    }
+    const cellNum = Number(cell.dataset.id);
+    const cellCoords = findCoordinatesByNum(cellNum, matrix);
+    const blankCoords = findCoordinatesByNum(emptyNumber, matrix);
+    const isValid = isValidForSwap(cellCoords, blankCoords);
+
+    if(isValid) {
+        setTimeout(() => {
+            cell.setAttribute('droggable', true)
+            cell.classList.add('hide')
+            event.dataTransfer.setData('id', event.target.dataset.id)
+        }, 0)
+    }
+}
+
+function dragEnd(event) {
+    const cell = event.target.closest('button');
+    cell.classList.remove('hide');
+}
+
+function dragOver(event) {
+    event.preventDefault(); 
+}
+
+cells.forEach(cell => {
+    cell.addEventListener('dragover', dragOver);
+})
+
+
 

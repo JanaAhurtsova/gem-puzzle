@@ -104,7 +104,7 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: 9;
-  background-color: #1abca9;
+  background-color: rgba(105, 105, 105, 0.3);
   opacity: 0.4;
   transition: all 0.4s linear;
 }
@@ -165,7 +165,7 @@ body {
 
 .wrapper,
 .header__wrapper {
-  max-width: 800px;
+  max-width: 600px;
   margin: auto;
   display: flex;
   justify-content: center;
@@ -281,16 +281,15 @@ body {
   border-radius: 50%;
   background: url("../assets/drop.png") center/cover no-repeat;
   color: #000000;
-  font-size: 2.7rem;
+  font-size: 2.5rem;
   font-weight: bold;
   margin: 2px;
   left: 0;
   top: 0;
-  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1.2);
+  transition: transform 0.3s cubic-bezier(0.165, 0.54, 0.44, 1.05);
 }
 .cell:active {
   filter: drop-shadow(0 0 20px rgb(108, 131, 150));
-  transform: scale(1.5);
 }
 @media (max-width: 768px) {
   .cell {
@@ -300,6 +299,10 @@ body {
 
 .hide {
   display: none;
+}
+
+.hovered {
+  background-color: rgba(105, 105, 105, 0.5);
 }
 
 /*# sourceMappingURL=style.css.map */
