@@ -165,6 +165,7 @@ function createTiles() {
     for (let i = 0; i < selectedSize * selectedSize; i++) {
         const cell = document.createElement('button');
         cell.classList.add('cell');
+        cell.setAttribute('id', i)
         cell.dataset.id = i;
         frame.append(cell)
 
@@ -183,7 +184,6 @@ function createTiles() {
         cells.push(cell)
     }
 }
-
 createTiles()
 
 let countTile = selectedSize * selectedSize;
@@ -241,9 +241,7 @@ function shuffledField() {
     if(!isSolvable(matrix)) {
         shuffledField();
     }
-    
 }
-
 shuffledField();
 
 function randomShuffle(arr) {
@@ -260,7 +258,7 @@ function game(event) {
     if(!cell) {
         return;
     }
-   
+
     audio.play();
 
     const cellNum = Number(cell.dataset.id);
@@ -285,7 +283,6 @@ function game(event) {
 //solvability check
 function findValidCoordinates({ blankCoords, matrix, blockedCoords }) {
     let validCoords = [];
-    let i = 0;
     for(let y = 0; y < matrix.length; y++) {
         for(let x = 0; x < matrix[y].length; x++) {
             if(isValidForSwap({x, y}, blankCoords)) {
@@ -342,6 +339,7 @@ function findEmptyPos(matrix) {
         }
     }
 }
+
 function isSolvable(matrix) {
     let matrixArr = matrix.flat();
     let pos = findEmptyPos(matrix);
@@ -461,6 +459,9 @@ function generateWonCard() {
     overlayWon.innerHTML = template;
     overlayWon.addEventListener('click', closeWonMessage);
     audioWin.play();
+    let result = `move: ${moveNum.textContent}, time: ${timeNum.textContent}`
+    localStorage.setItem('result', result);
+
     return overlayWon;
 }
 
@@ -487,9 +488,8 @@ function dragStart(event) {
 
     if(isValid) {
         setTimeout(() => {
-            cell.setAttribute('droggable', true)
             cell.classList.add('hide')
-            event.dataTransfer.setData('id', event.target.dataset.id)
+            // event.dataTransfer.setData('id', event.target.id);
         }, 0)
     }
 }
@@ -499,13 +499,60 @@ function dragEnd(event) {
     cell.classList.remove('hide');
 }
 
-function dragOver(event) {
-    event.preventDefault(); 
+// function dragOver(event) {
+//     event.preventDefault(); 
+// }
+
+// function dragDrop(event) {
+//     audio.play();
+//     const id = event.dataTransfer.getData('id')
+//     const draggableElement = document.getElementById(id);
+//     frame.append(draggableElement);
+//     event.dataTransfer.clearData()
+// }
+// window.addEventListener('load', getLocalStorage)
+saveBtn.addEventListener('click', setLocalStorage)
+
+function setLocalStorage() {
+    localStorage.setItem('matrix', JSON.stringify(matrix));
+    localStorage.setItem('time', timeNum.textContent);
+    localStorage.setItem('move', moveNum.textContent);
 }
 
-cells.forEach(cell => {
-    cell.addEventListener('dragover', dragOver);
-})
+// function getLocalStorage() {
+//     if(localStorage.getItem('matrix')) {
+//         matrix = JSON.parse(localStorage.getItem('matrix'));
+//     }
+//     if(localStorage.getItem('move')) {
+//         moveNum.textContent = localStorage.getItem('move');
+//     }
+//     if(localStorage.getItem('time')) {
+//         timeNum.textContent = localStorage.getItem('time');
+//     }
+// }
 
+function generateResults() {
+    let template = '';
+    const overlayResult = document.createElement('div');
+    overlayResult.className = 'overlay__result';
 
+    template += `<div class='results'>`
+    template += `<p class='results__title'> Best Results </p>`
+    template += `<p> ${localStorage.getItem('result')} </p>`
+    template += `</div>`
 
+    body.append(overlayResult)
+    overlayResult.innerHTML = template;
+    overlayResult.addEventListener('click', closeResults);
+
+    return overlayResult
+}
+
+resultBtn.addEventListener('click', generateResults)
+
+function closeResults(e) {
+    let classes = e.target.classList;
+    if(classes.contains('overlay__result')) {
+        document.querySelector('.overlay__result').remove();
+    }
+}
