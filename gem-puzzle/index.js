@@ -74,9 +74,6 @@ audio.setAttribute('src', 'assets/drop_sound.mp3')
 const frame = document.createElement('div');
 frame.classList.add('frame')
 
-const audioShuffle = document.createElement('audio');
-audioShuffle.setAttribute('src', 'assets/waterfall.mp3')
-
 const frameSize = document.createElement('span');
 frameSize.classList.add('frame__size');
 
@@ -225,10 +222,6 @@ function setPositionCells(matrix) {
     }
 }
 
-const maxShuffle = 70;
-let duration;
-let shuffled = false;
-
 shuffleBtn.addEventListener('click', () => {
     shuffledField();
     closeBurger();
@@ -237,41 +230,18 @@ shuffleBtn.addEventListener('click', () => {
 //shuffle tiles
 function shuffledField() {
     resetTimer();
-
-    if(shuffled) {
-        return
-    }
-
+    
     moveNum.textContent = '0';
-
-    audioShuffle.play();
-    shuffled = true;
     
     const shuffleArr = randomShuffle(matrix.flat());
     matrix = getMatrix(shuffleArr)
     setPositionCells(matrix);
 
-    clearInterval(duration);
-    let shuffleCount = 0;
-
-    if(shuffleCount === 0) {
-        duration = setInterval(() => {
-            randomShuffle(matrix.flat());
-            setPositionCells(matrix);
-
-            shuffleCount += 1;
-
-            if(shuffleCount >= maxShuffle) {
-                clearInterval(duration);
-                shuffled = false;
-                audioShuffle.pause();
-                startTimer();
-                if(!isSolvable(matrix)) {
-                    shuffledField();
-                }
-            }
-        }, 25)
+    startTimer();
+    if(!isSolvable(matrix)) {
+        shuffledField();
     }
+    
 }
 
 shuffledField();
@@ -286,10 +256,6 @@ function randomShuffle(arr) {
 frame.addEventListener('click', game)
 
 function game(event) {
-    if(shuffled) {
-        return
-    }
-
     const cell = event.target.closest('button');
     if(!cell) {
         return;
@@ -301,7 +267,7 @@ function game(event) {
     const cellCoords = findCoordinatesByNum(cellNum, matrix);
     const blankCoords = findCoordinatesByNum(emptyNumber, matrix);
     const isValidSwap = isValidForSwap(cellCoords, blankCoords);
-    
+
     if(isValidSwap) {
         swap(cellCoords, blankCoords, matrix);
         setPositionCells(matrix)
