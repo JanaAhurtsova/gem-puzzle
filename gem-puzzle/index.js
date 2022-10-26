@@ -150,8 +150,7 @@ function closeBurger() {
 //sound of game
 volume.addEventListener('click', () => {
     audio.muted = !audio.muted;
-    audioShuffle.muted = !audioShuffle.muted
-    if(audio.muted && audioShuffle.muted) {
+    if(audio.muted) {
         volume.classList.add('mute');
     } else {
         volume.classList.remove('mute');
@@ -241,6 +240,7 @@ function shuffledField() {
     if(!isSolvable(matrix)) {
         shuffledField();
     }
+    frame.addEventListener('click', game);
 }
 shuffledField();
 
@@ -272,6 +272,7 @@ function game(event) {
         count++
         moveNum.textContent = `${count}`;
         if(isWon(matrix)) {
+            frame.removeEventListener('click', game);
             stopTimer();
             setTimeout(() => {
             generateWonCard();
@@ -475,6 +476,8 @@ function closeWonMessage(e) {
 
 frame.addEventListener('dragstart', dragStart);
 frame.addEventListener('dragend', dragEnd);
+frame.addEventListener('dragover', dragOver);
+
 
 function dragStart(event) {
     const cell = event.target.closest('button');
@@ -489,7 +492,6 @@ function dragStart(event) {
     if(isValid) {
         setTimeout(() => {
             cell.classList.add('hide')
-            // event.dataTransfer.setData('id', event.target.id);
         }, 0)
     }
 }
@@ -499,18 +501,10 @@ function dragEnd(event) {
     cell.classList.remove('hide');
 }
 
-// function dragOver(event) {
-//     event.preventDefault(); 
-// }
+function dragOver(event) {
+    event.preventDefault(); 
+}
 
-// function dragDrop(event) {
-//     audio.play();
-//     const id = event.dataTransfer.getData('id')
-//     const draggableElement = document.getElementById(id);
-//     frame.append(draggableElement);
-//     event.dataTransfer.clearData()
-// }
-// window.addEventListener('load', getLocalStorage)
 saveBtn.addEventListener('click', setLocalStorage)
 
 function setLocalStorage() {
@@ -518,18 +512,6 @@ function setLocalStorage() {
     localStorage.setItem('time', timeNum.textContent);
     localStorage.setItem('move', moveNum.textContent);
 }
-
-// function getLocalStorage() {
-//     if(localStorage.getItem('matrix')) {
-//         matrix = JSON.parse(localStorage.getItem('matrix'));
-//     }
-//     if(localStorage.getItem('move')) {
-//         moveNum.textContent = localStorage.getItem('move');
-//     }
-//     if(localStorage.getItem('time')) {
-//         timeNum.textContent = localStorage.getItem('time');
-//     }
-// }
 
 function generateResults() {
     let template = '';
