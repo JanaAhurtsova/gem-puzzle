@@ -13,3 +13,7 @@ body {
 .lock {
     overflow-y: hidden;
 }
+
+.active {
+    color: $color-btn;
+}
