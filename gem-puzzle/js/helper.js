@@ -98,7 +98,7 @@ export const isWin = (matrix, countTile) => {
 
 export const sortResults = () => {
   const results = JSON.parse(localStorage.getItem('result')) ?? [];
-  if (results.length) {
+  if (results.length > 1) {
     results.sort((a,b) => {
       if (a.time > b.time) {
         return 1;
