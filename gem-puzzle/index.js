@@ -204,6 +204,7 @@ function shuffle() {
   resetTimer();
   shuffledField();
   closeBurger(hamburger, hamburgerLine, buttonsContainer, overlay, body);
+  frame.addEventListener("click", game);
 }
 
 //shuffle tiles
@@ -216,7 +217,6 @@ function shuffledField() {
   if (!isSolvable(matrix, selectedSize)) {
     shuffledField();
   }
-  frame.addEventListener("click", game);
 }
 
 if (localStorage.getItem("matrix")) {
@@ -313,6 +313,10 @@ sizeContainer.addEventListener("click", (event) => {
   setPositionCells(matrix);
   shuffledField();
   frameSize.textContent = `Frame size: ${selectedSize}x${selectedSize}`;
+  moveNum.textContent = "0";
+  count = 0;
+  resetTimer();
+  startTimer();
 });
 
 function activeSize(size) {

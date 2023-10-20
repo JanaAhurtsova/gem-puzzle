@@ -96,23 +96,24 @@ export const isWin = (matrix, countTile) => {
   return true;
 };
 
-export const sortResults = (wins) => {
-  const results = JSON.parse(localStorage.getItem('result')) ?? wins;
-  results.sort((a,b) => {
-    if (a.time > b.time) {
-      return 1;
-    } else if(a.time < b.time) {
-      return -1;
-    } else {
-      if (a.move > b.move) {
+export const sortResults = () => {
+  const results = JSON.parse(localStorage.getItem('result')) ?? [];
+  if (results.length) {
+    results.sort((a,b) => {
+      if (a.time > b.time) {
         return 1;
-      } else if (a.move < b.move){
+      } else if(a.time < b.time) {
         return -1;
       } else {
-        return;
+        if (a.move > b.move) {
+          return 1;
+        } else if (a.move < b.move){
+          return -1;
+        } else {
+          return;
+        }
       }
-    }
-  })
-  
+    })
+  }
   return results.length > 10 ? results.slice(0, 10) : results;
 };
