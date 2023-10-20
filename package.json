@@ -1,0 +1,11 @@
+{
+  "name": "gem-puzzle",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".index.js",
+  "scripts": {
+    "style": "sass --watch gem-puzzle/sass/style.scss gem-puzzle/sass/style.css"
+  },
+  "author": "",
+  "license": "ISC"
+}

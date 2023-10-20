@@ -1,0 +1,26 @@
+.choose__size {
+    @include flex();
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.sizes {
+    margin-top: 15px;
+}
+
+.size {
+    width: 15%;
+    height: 30px;
+    cursor: pointer;
+    font-size: 2rem;
+    &:hover {
+        color: $color-btn;
+    }
+}
+
+.choose__size,
+.frame__size,
+.sizes,
+.text {
+    color: $color-number;
+}
